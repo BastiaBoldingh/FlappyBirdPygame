@@ -1,6 +1,17 @@
 import pygame
 import random 
 
+def get_highscore(): 
+    try: 
+        with open("highscore.txt", "r") as f: 
+            return int(f.read())
+    except: 
+        return 0
+
+def write_highscore(score): 
+    with open("highscore.txt", "w") as f: 
+        f.write(str(score))
+
 class Bird: 
     def __init__(self, x, y): 
         self.x = x
@@ -25,9 +36,9 @@ class Bird:
         screen.blit(self.image, self.rect)
 
 class Pipe:
-    def __init__(self):
+    def __init__(self, x=640):
         self.vel = -3
-        self.x = 640
+        self.x = x
         self.width = 50
         self.gap = 150
         self.top_height = random.randint(50, 200)
@@ -56,6 +67,18 @@ class ScoreBoard:
         screen.blit(self.text_surface, self.text_rect)
     
     def draw_game_over(self, screen):
-        game_over_surface = pygame.font.SysFont(None, 72).render('Game Over!', True, (255, 0, 0))
+        #Updating the highscore if needed
+        highscore = get_highscore()
+        if self.score > highscore: 
+            highscore = self.score
+            write_highscore(highscore)
+
+        game_over_surface = pygame.font.SysFont(None, 72).render(f'Game Over! Score: {self.score}', True, (255, 0, 0))
+        tooltip_surface = pygame.font.SysFont(None, 48).render(f'Press SPACE to Restart', True, (255, 0, 0))
+        highscore_surface = pygame.font.SysFont(None, 48).render(f'High Score: {highscore}', True, (255, 0, 0))
         game_over_rect = game_over_surface.get_rect(center=(320, 180))
+        tooltip_rect = tooltip_surface.get_rect(center=(320, 240))
+        highscore_rect = highscore_surface.get_rect(center=(320, 120))
         screen.blit(game_over_surface, game_over_rect)
+        screen.blit(tooltip_surface, tooltip_rect)
+        screen.blit(highscore_surface, highscore_rect)
