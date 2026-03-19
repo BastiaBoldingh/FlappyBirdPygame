@@ -17,19 +17,21 @@ class Bird:
         self.y += self.vel_y
     
     def flap(self):
-        self.vel_y = -10
+        self.vel_y = -8
 
 class Pipe:
     def __init__(self):
+        self.vel = -3
         self.x = 640
         self.width = 50
         self.gap = 150
         self.top_height = random.randint(50, 200)
         self.bottom_height = 360 - self.top_height - self.gap
         self.color = (0, 255, 0)
+        self.passed = False
 
-    def update(self):
-        self.x -= 3
+    def update(self, speed_multiplier):
+        self.x += self.vel *speed_multiplier
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, (self.x, 0, self.width, self.top_height))

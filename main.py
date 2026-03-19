@@ -18,9 +18,16 @@ bird = Bird(100, 180)
 pipes = [Pipe()]
 scoreboard = ScoreBoard()
 
+counter = 0
+speed_multiplier = 1.0
 
 while running:
-    
+    counter += 1
+    if counter % 120 == 0: 
+        speed_multiplier = 1 + scoreboard.score * 0.1
+        pipes.append(Pipe())
+
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -41,8 +48,15 @@ while running:
     screen.blit(bird.image, (bird.x, bird.y))
 
     for pipe in pipes:
-        pipe.update()
+        pipe.update(speed_multiplier=speed_multiplier)
         pipe.draw(screen)
+        if pipe.x < 100 and not pipe.passed: 
+            scoreboard.increment()
+            pipe.passed = True
+        elif pipe.x + pipe.width < 0: 
+            pipes.remove(pipe)
+    
+ 
     
     scoreboard.draw_score(screen)
 
