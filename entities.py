@@ -8,6 +8,7 @@ class Bird:
         self.vel_y = 0
         self.gravity = 0.5
         self.image = pygame.Surface((30, 30))
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
         self.image.fill((255, 0, 0))
     
     def update(self): 
@@ -15,9 +16,13 @@ class Bird:
         if self.vel_y < 10: 
             self.vel_y += self.gravity
         self.y += self.vel_y
+        self.rect.topleft = (self.x, self.y)
     
     def flap(self):
         self.vel_y = -8
+    
+    def draw(self, screen): 
+        screen.blit(self.image, self.rect)
 
 class Pipe:
     def __init__(self):

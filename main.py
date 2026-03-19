@@ -45,7 +45,7 @@ while running:
     screen.fill((255, 255, 255))
 
     bird.update()
-    screen.blit(bird.image, (bird.x, bird.y))
+    bird.draw(screen)
 
     for pipe in pipes:
         pipe.update(speed_multiplier=speed_multiplier)
@@ -55,8 +55,12 @@ while running:
             pipe.passed = True
         elif pipe.x + pipe.width < 0: 
             pipes.remove(pipe)
-    
- 
+     
+    # Collision
+    if bird.rect.collidelist([pygame.Rect(pipe.x, 0, pipe.width, pipe.top_height) for pipe in pipes]) != -1 or bird.rect.collidelist([pygame.Rect(pipe.x, 360 - pipe.bottom_height, pipe.width, pipe.bottom_height) for pipe in pipes]) != -1:
+        print("Game Over!")
+        time.sleep(2)
+        running = False
     
     scoreboard.draw_score(screen)
 
