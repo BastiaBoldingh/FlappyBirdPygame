@@ -1,6 +1,7 @@
 import pygame
 import sys
 from entities import Bird, Pipe, ScoreBoard
+from button import Button
 import time
 
 pygame.init()
@@ -14,7 +15,11 @@ FPS = 60
 
 running = True
 
-
+def draw_text(screen, text, size, color, x, y, font):
+    font = pygame.font.SysFont(font, size)
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect(center=(x, y))
+    screen.blit(text_surface, text_rect) 
 
 def new_game(): 
     bird = Bird(100, 180)
@@ -66,25 +71,51 @@ def new_game():
         
         if game_over: 
             game_on = False
-            screen.fill((0, 0, 0))
-            scoreboard.draw_game_over(screen)
+            game_over_screen(scoreboard)
+            new_game()
         
         pygame.display.flip()
         clock.tick(FPS)
 
+def main_menu(): 
+    play_button = Button(220, 150, 200, 50, "Play")
+    quit_button = Button(220, 250, 200, 50, "Quit")
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif play_button.is_clicked(event) or (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE):
+                new_game()
+            elif quit_button.is_clicked(event):
+                pygame.quit()
+                sys.exit()
         
+        screen.fill((255, 255, 255))
+        draw_text(screen, "Flappy Bird", 64, (0, 0, 255), 320, 80, None)
+        play_button.draw(screen)
+        quit_button.draw(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
 
+def game_over_screen(scoreboard):
+    while True:
+        screen.fill((0, 0, 0))
+        scoreboard.draw_game_over(screen)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                return
+        pygame.display.flip()
+        clock.tick(FPS)
 
 while running:
     
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                new_game()
+    main_menu()
     
-
+ 
 pygame.quit()
 sys.exit()
 
