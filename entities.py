@@ -1,5 +1,6 @@
 import pygame
 import random 
+import os 
 
 def get_highscore(): 
     try: 
@@ -40,30 +41,46 @@ class Pipe:
         self.vel = -3
         self.x = x
         self.width = 50
-        self.gap = 150
-        self.top_height = random.randint(50, 200)
-        self.bottom_height = 360 - self.top_height - self.gap
+        self.gap = 130
+        self.top_height = random.randint(50, 150)
+        self.bottom_height = 300 - self.top_height - self.gap
         self.color = (0, 255, 0)
         self.passed = False
 
+        self.top_img = pygame.image.load(os.path.join('assets', 'images', 'top_pipe.png')).convert_alpha()
+        self.bottom_img = pygame.image.load(os.path.join('assets', 'images', 'bottom_pipe.png')).convert_alpha()
+
+        self.top_rect = self.top_img.get_rect(bottomleft=(self.x, self.top_height))
+        self.bottom_rect = self.bottom_img.get_rect(topleft=(self.x, self.top_height + self.gap))
+
     def update(self, speed_multiplier):
         self.x += self.vel *speed_multiplier
+        self.top_rect.x = self.x
+        self.bottom_rect.x = self.x
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, (self.x, 0, self.width, self.top_height))
-        pygame.draw.rect(screen, self.color, (self.x, 360 - self.bottom_height, self.width, self.bottom_height))
+        screen.blit(self.top_img, self.top_rect)
+        screen.blit(self.bottom_img, self.bottom_rect)
+    def reset(self):
+        self.x = 640
+        self.top_height = random.randint(50, 150)
+        self.bottom_height = 300 - self.top_height - self.gap
+        self.passed = False
+        self.top_rect.bottomleft = (self.x, self.top_height)
+        self.bottom_rect.topleft = (self.x, self.top_height + self.gap)
     
 
 class ScoreBoard:
     def __init__(self):
         self.score = 0
-        self.text_surface = pygame.font.SysFont(None, 36).render(f'Score: {self.score}', True, (0, 0, 0))
+        self.font = pygame.font.SysFont(None, 36)  # create once
+        self.text_surface = self.font.render(f'Score: {self.score}', True, (0, 0, 0))
         self.text_rect = self.text_surface.get_rect(topleft=(10, 10))
     def increment(self):
         self.score += 1
     
     def draw_score(self, screen):
-        self.text_surface = pygame.font.SysFont(None, 36).render(f'Score: {self.score}', True, (0, 0, 0))
+        self.text_surface = self.font.render(f'Score: {self.score}', True, (0, 0, 0))
         screen.blit(self.text_surface, self.text_rect)
     
     def draw_game_over(self, screen):

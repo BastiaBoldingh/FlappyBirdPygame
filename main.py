@@ -2,8 +2,10 @@ import pygame
 import sys
 from entities import Bird, Pipe, ScoreBoard
 from button import Button
-from background import Background
+from background import BackgroundObject
 import time
+import os
+
 
 pygame.init()
 
@@ -13,8 +15,10 @@ pygame.display.set_caption("Flappy Bird")
 clock = pygame.time.Clock()
 FPS = 60
 
-BACKGROUND_IMG = pygame.image.load('.\\assets\\images\\flappy_bird_background.png').convert()
+BACKGROUND_IMG = pygame.image.load(os.path.join('assets', 'images', 'flappy_bird_background.png')).convert()
 BACKGROUND_IMG = pygame.transform.scale(BACKGROUND_IMG, (640, 360))
+FLOOR_IMG = pygame.image.load(os.path.join('assets', 'images', 'flappy_bird_floor.png')).convert()
+
 
 
 running = True
@@ -29,7 +33,8 @@ def new_game():
     bird = Bird(100, 180)
     pipes = [Pipe(), Pipe(x=960)]
     scoreboard = ScoreBoard()
-    background = Background(BACKGROUND_IMG, speed=1)
+    background = BackgroundObject(BACKGROUND_IMG, speed=1)
+    floor = BackgroundObject(FLOOR_IMG, speed=3, y=300)
     counter = 0
     speed_multiplier = 1.0
 
@@ -40,6 +45,7 @@ def new_game():
     while game_on:
         speed_multiplier = 1 + scoreboard.score * 0.01
         background.update()
+        floor.update(speed_multiplier=speed_multiplier)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -50,6 +56,7 @@ def new_game():
         #Drawing background            
         screen.fill((255, 255, 255))
         background.draw(screen)
+        floor.draw(screen)
 
 
 
@@ -65,8 +72,7 @@ def new_game():
                 scoreboard.increment()
                 pipe.passed = True
             elif pipe.x + pipe.width < 0: 
-                pipes.remove(pipe)
-                pipes.append(Pipe())
+                pipe.reset()
     
         scoreboard.draw_score(screen)
 
@@ -74,7 +80,7 @@ def new_game():
         if bird.y > 360 or bird.y < 0: 
             game_over = True
         #collision with pipes
-        if bird.rect.collidelist([pygame.Rect(pipe.x, 0, pipe.width, pipe.top_height) for pipe in pipes]) != -1 or bird.rect.collidelist([pygame.Rect(pipe.x, 360 - pipe.bottom_height, pipe.width, pipe.bottom_height) for pipe in pipes]) != -1:
+        if bird.rect.collidelist([pipe.top_rect for pipe in pipes]) != -1 or bird.rect.collidelist([pipe.bottom_rect for pipe in pipes]) != -1:
             game_over = True
         
         if game_over: 
@@ -88,7 +94,9 @@ def new_game():
 def main_menu(): 
     play_button = Button(220, 150, 200, 50, "Play")
     quit_button = Button(220, 250, 200, 50, "Quit")
+    background = BackgroundObject(BACKGROUND_IMG, speed=1)
     while True:
+        background.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -100,7 +108,8 @@ def main_menu():
                 sys.exit()
         
         screen.fill((255, 255, 255))
-        draw_text(screen, "Flappy Bird", 64, (0, 0, 255), 320, 80, None)
+        background.draw(screen)
+        draw_text(screen, "Static Cube", 64, (209, 90, 56), 320, 80, None)
         play_button.draw(screen)
         quit_button.draw(screen)
         pygame.display.flip()
