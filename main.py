@@ -2,6 +2,7 @@ import pygame
 import sys
 from entities import Bird, Pipe, ScoreBoard
 from button import Button
+from background import Background
 import time
 
 pygame.init()
@@ -11,6 +12,9 @@ pygame.display.set_caption("Flappy Bird")
 
 clock = pygame.time.Clock()
 FPS = 60
+
+BACKGROUND_IMG = pygame.image.load('.\\assets\\images\\flappy_bird_background.png').convert()
+BACKGROUND_IMG = pygame.transform.scale(BACKGROUND_IMG, (640, 360))
 
 
 running = True
@@ -25,6 +29,7 @@ def new_game():
     bird = Bird(100, 180)
     pipes = [Pipe(), Pipe(x=960)]
     scoreboard = ScoreBoard()
+    background = Background(BACKGROUND_IMG, speed=1)
     counter = 0
     speed_multiplier = 1.0
 
@@ -33,8 +38,8 @@ def new_game():
     game_on = True
     bird.flap()
     while game_on:
-        speed_multiplier = 1 + scoreboard.score * 0.1
-        
+        speed_multiplier = 1 + scoreboard.score * 0.01
+        background.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -44,6 +49,9 @@ def new_game():
                     bird.flap()
         #Drawing background            
         screen.fill((255, 255, 255))
+        background.draw(screen)
+
+
 
         #Updating and drawing entities
         bird.update()
@@ -72,7 +80,7 @@ def new_game():
         if game_over: 
             game_on = False
             game_over_screen(scoreboard)
-            new_game()
+            break
         
         pygame.display.flip()
         clock.tick(FPS)
@@ -112,7 +120,6 @@ def game_over_screen(scoreboard):
         clock.tick(FPS)
 
 while running:
-    
     main_menu()
     
  
