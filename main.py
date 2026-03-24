@@ -8,14 +8,22 @@ import os
 
 pygame.init()
 
-screen = pygame.display.set_mode((640, 360))
+icon = pygame.surface.Surface((10, 10))
+icon.fill((255, 0, 0))
+
+pygame.display.set_icon(icon)
+WINDOW_WIDTH, WINDOW_HEIGHT = 640, 360
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Flappy Bird")
 
 clock = pygame.time.Clock()
 FPS = 60
 
+# Render to a fixed internal surface then scale to window size for resize support
+game_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+
 BACKGROUND_IMG = pygame.image.load(os.path.join('assets', 'images', 'flappy_bird_background.png')).convert()
-BACKGROUND_IMG = pygame.transform.scale(BACKGROUND_IMG, (640, 300))
+BACKGROUND_IMG = pygame.transform.scale(BACKGROUND_IMG, (WINDOW_WIDTH, 300))
 FLOOR_IMG = pygame.image.load(os.path.join('assets', 'images', 'flappy_bird_floor.png')).convert()
 
 
@@ -28,7 +36,8 @@ def draw_text(screen, text, size, color, x, y, font):
     text_rect = text_surface.get_rect(center=(x, y))
     screen.blit(text_surface, text_rect) 
 
-def new_game(): 
+def new_game():
+    global screen
     bird = Bird(100, 180)
     pipes = [Pipe(), Pipe(x=960)]
     scoreboard = ScoreBoard()
@@ -49,36 +58,35 @@ def new_game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
+            elif event.type == pygame.VIDEORESIZE:
+                screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
                     bird.flap()
-        #Drawing background            
-        screen.fill((255, 255, 255))
-        background.draw(screen)
-        floor.draw(screen)
+        # Drawing background            
+        game_surface.fill((255, 255, 255))
+        background.draw(game_surface)
+        floor.draw(game_surface)
 
-
-
-        #Updating and drawing entities
+        # Updating and drawing entities
         bird.update()
-        bird.draw(screen)
-
+        bird.draw(game_surface)
 
         for pipe in pipes:
             pipe.update(speed_multiplier=speed_multiplier)
-            pipe.draw(screen)
+            pipe.draw(game_surface)
             if pipe.x < 100 and not pipe.passed: 
                 scoreboard.increment()
                 pipe.passed = True
             elif pipe.x + pipe.width < 0: 
                 pipe.reset()
     
-        scoreboard.draw_score(screen)
+        scoreboard.draw_score(game_surface)
 
-        #collision with roof and floor
+        # collision with roof and floor
         if bird.y > 300 or bird.y < 0: 
             game_over = True
-        #collision with pipes
+        # collision with pipes
         if bird.rect.collidelist([pipe.top_rect for pipe in pipes]) != -1 or bird.rect.collidelist([pipe.bottom_rect for pipe in pipes]) != -1 or bird.rect.collidelist([floor.rect1, floor.rect2]) != -1:
             game_over = True
         
@@ -86,11 +94,14 @@ def new_game():
             game_on = False
             game_over_screen(scoreboard)
             break
-        
+
+        scaled = pygame.transform.smoothscale(game_surface, screen.get_size())
+        screen.blit(scaled, (0, 0))
         pygame.display.flip()
         clock.tick(FPS)
 
-def main_menu(): 
+def main_menu():
+    global screen
     play_button = Button(220, 150, 200, 50, "Play")
     quit_button = Button(220, 250, 200, 50, "Quit")
     background = BackgroundObject(BACKGROUND_IMG, speed=1)
@@ -102,31 +113,42 @@ def main_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.VIDEORESIZE:
+                screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
             elif play_button.is_clicked(event) or (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE):
                 new_game()
             elif quit_button.is_clicked(event):
                 pygame.quit()
                 sys.exit()
         
-        screen.fill((255, 255, 255))
-        background.draw(screen)
-        floor.draw(screen)
-        draw_text(screen, "Flappy Bird", 64, (255, 255, 255), 320, 80, None)
-        play_button.draw(screen)
-        quit_button.draw(screen)
+        game_surface.fill((255, 255, 255))
+        background.draw(game_surface)
+        floor.draw(game_surface)
+        draw_text(game_surface, "Flappy Bird", 64, (255, 255, 255), 320, 80, None)
+        play_button.draw(game_surface)
+        quit_button.draw(game_surface)
+
+        scaled = pygame.transform.smoothscale(game_surface, screen.get_size())
+        screen.blit(scaled, (0, 0))
         pygame.display.flip()
         clock.tick(FPS)
 
 def game_over_screen(scoreboard):
+    global screen
     while True:
-        screen.fill((0, 0, 0))
-        scoreboard.draw_game_over(screen)
+        game_surface.fill((0, 0, 0))
+        scoreboard.draw_game_over(game_surface)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.VIDEORESIZE:
+                screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 return
+
+        scaled = pygame.transform.smoothscale(game_surface, screen.get_size())
+        screen.blit(scaled, (0, 0))
         pygame.display.flip()
         clock.tick(FPS)
 
