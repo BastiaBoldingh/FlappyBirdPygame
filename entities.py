@@ -19,22 +19,31 @@ class Bird:
         self.y = y
         self.vel_y = 0
         self.gravity = 0.5
-        self.image = pygame.Surface((30, 30))
+        self.base_image = pygame.Surface((30, 30), pygame.SRCALPHA)
+        self.base_image.fill((255, 0, 0))
+        self.image = self.base_image
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
-        self.image.fill((255, 0, 0))
+        self.falling = False
     
     def update(self): 
         #Apply gravity
-        if self.vel_y < 10: 
-            self.vel_y += self.gravity
+        self.vel_y = min(self.vel_y + self.gravity, 10)
         self.y += self.vel_y
-        self.rect.topleft = (self.x, self.y)
+        self.check_if_falling()
+
     
     def flap(self):
         self.vel_y = -8
     
     def draw(self, screen): 
         screen.blit(self.image, self.rect)
+    
+    def check_if_falling(self): 
+        angle = max(-75, min(self.vel_y * -4, 25)) 
+        self.image = pygame.transform.rotate(self.base_image, angle)
+        self.rect = self.image.get_rect(center=(self.x + 15, self.y + 15))
+
+    
 
 class Pipe:
     def __init__(self, x=640):

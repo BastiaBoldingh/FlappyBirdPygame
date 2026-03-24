@@ -3,7 +3,6 @@ import sys
 from entities import Bird, Pipe, ScoreBoard
 from button import Button
 from background import BackgroundObject
-import time
 import os
 
 
@@ -16,7 +15,7 @@ clock = pygame.time.Clock()
 FPS = 60
 
 BACKGROUND_IMG = pygame.image.load(os.path.join('assets', 'images', 'flappy_bird_background.png')).convert()
-BACKGROUND_IMG = pygame.transform.scale(BACKGROUND_IMG, (640, 360))
+BACKGROUND_IMG = pygame.transform.scale(BACKGROUND_IMG, (640, 300))
 FLOOR_IMG = pygame.image.load(os.path.join('assets', 'images', 'flappy_bird_floor.png')).convert()
 
 
@@ -95,8 +94,10 @@ def main_menu():
     play_button = Button(220, 150, 200, 50, "Play")
     quit_button = Button(220, 250, 200, 50, "Quit")
     background = BackgroundObject(BACKGROUND_IMG, speed=1)
+    floor = BackgroundObject(FLOOR_IMG, speed=3, y=300)
     while True:
         background.update()
+        floor.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -109,7 +110,8 @@ def main_menu():
         
         screen.fill((255, 255, 255))
         background.draw(screen)
-        draw_text(screen, "Static Cube", 64, (255, 255, 255), 320, 80, None)
+        floor.draw(screen)
+        draw_text(screen, "Flappy Bird", 64, (255, 255, 255), 320, 80, None)
         play_button.draw(screen)
         quit_button.draw(screen)
         pygame.display.flip()
