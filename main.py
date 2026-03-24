@@ -77,10 +77,10 @@ def new_game():
         scoreboard.draw_score(screen)
 
         #collision with roof and floor
-        if bird.y > 360 or bird.y < 0: 
+        if bird.y > 300 or bird.y < 0: 
             game_over = True
         #collision with pipes
-        if bird.rect.collidelist([pipe.top_rect for pipe in pipes]) != -1 or bird.rect.collidelist([pipe.bottom_rect for pipe in pipes]) != -1:
+        if bird.rect.collidelist([pipe.top_rect for pipe in pipes]) != -1 or bird.rect.collidelist([pipe.bottom_rect for pipe in pipes]) != -1 or bird.rect.collidelist([floor.rect1, floor.rect2]) != -1:
             game_over = True
         
         if game_over: 
@@ -109,7 +109,7 @@ def main_menu():
         
         screen.fill((255, 255, 255))
         background.draw(screen)
-        draw_text(screen, "Static Cube", 64, (209, 90, 56), 320, 80, None)
+        draw_text(screen, "Static Cube", 64, (255, 255, 255), 320, 80, None)
         play_button.draw(screen)
         quit_button.draw(screen)
         pygame.display.flip()
