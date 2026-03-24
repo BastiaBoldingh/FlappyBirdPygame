@@ -94,7 +94,8 @@ def new_game():
             game_on = False
             game_over_screen(scoreboard)
             break
-
+        
+        #Rendering the game surface to the window
         scaled = pygame.transform.smoothscale(game_surface, screen.get_size())
         screen.blit(scaled, (0, 0))
         pygame.display.flip()
@@ -115,11 +116,22 @@ def main_menu():
                 sys.exit()
             elif event.type == pygame.VIDEORESIZE:
                 screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-            elif play_button.is_clicked(event) or (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE):
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
+                if screen.get_flags() & pygame.FULLSCREEN:
+                    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
+                else:
+                    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                scale_x = WINDOW_WIDTH / screen.get_width()
+                scale_y = WINDOW_HEIGHT / screen.get_height()
+                scaled_pos = (event.pos[0] * scale_x, event.pos[1] * scale_y)
+                if play_button.rect.collidepoint(scaled_pos):
+                    new_game()
+                elif quit_button.rect.collidepoint(scaled_pos):
+                    pygame.quit()
+                    sys.exit()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 new_game()
-            elif quit_button.is_clicked(event):
-                pygame.quit()
-                sys.exit()
         
         game_surface.fill((255, 255, 255))
         background.draw(game_surface)
